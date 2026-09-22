@@ -1,5 +1,23 @@
 # Changelog
 
+## 1.0.9 — 2026-09-22
+
+### Fixed
+
+- Fixed infinite loading screen: improved ingress fix script to also handle Request objects, full same-origin URLs, and prevent double-rewriting, so all API calls from Vikunja reach the backend correctly.
+
+## 1.0.8 — 2026-09-22
+
+### Fixed
+
+- Fixed 502 Bad Gateway caused by inline JavaScript in the nginx config containing special characters that nginx interpreted as variables. Moved the ingress fix script to a separate static file served by nginx.
+
+## 1.0.7 — 2026-09-22
+
+### Changed
+
+- Redesigned ingress proxy strategy: added absolute `<base>` tag derived from HA's ingress path, converted absolute asset paths to relative via sub_filter, and injected a script to strip the ingress prefix for Vue Router and patch fetch/XHR for API routing.
+
 ## 1.0.6 — 2026-09-19
 
 ### Fixed
