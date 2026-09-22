@@ -1,105 +1,83 @@
-# Vikunja Home Assistant Add-on
+# Vikunja for Home Assistant
+
+> Self-hosted task and project management.
+> Open-source alternative to Todoist, Trello, and Microsoft To Do.
 
 ## What it does
 
-Vikunja is a self-hosted, open-source task and project management application.
-It is a lightweight alternative to Todoist, Trello, and Microsoft To Do. You
-can manage tasks, create lists and kanban boards, set due dates and reminders,
-share projects with family members, and sync across all your devices.
-
-Everything runs locally on your Home Assistant instance.
+Vikunja lets you manage tasks, lists, kanban boards, and calendars for your
+household from within Home Assistant. It supports multiple users, shared
+projects, labels, priorities, due dates, reminders, and CalDAV sync.
 
 ## Getting started
 
-Once the add-on is running, click **Vikunja** in the Home Assistant sidebar
-to open the web interface. Create your first account, then start organizing
-your tasks.
+After installing the add-on, click **Start** and then open it from the sidebar.
+You will be prompted to create your first account.
 
-You can also access Vikunja directly at:
+## Database
+
+Vikunja supports two database options:
+
+### SQLite (default)
+
+No configuration needed. The database file is stored in the add-on's
+persistent storage automatically. This is the simplest option for small
+households.
+
+### MariaDB (recommended for multiple users)
+
+For better performance with multiple users or large amounts of data, use the
+**MariaDB** add-on for Home Assistant:
+
+1. Install the **MariaDB** add-on from the Home Assistant Add-on Store.
+2. In the MariaDB add-on configuration, add a database and user:
+   ```yaml
+   databases:
+     - vikunja
+   logins:
+     - username: vikunja
+       password: YOUR_SECURE_PASSWORD
+   rights:
+     - username: vikunja
+       database: vikunja
+   ```
+3. Start (or restart) the MariaDB add-on.
+4. In this Vikunja add-on's configuration, set:
+   - **database_type**: `mysql`
+   - **database_host**: `core-mariadb` (already set by default)
+   - **database_port**: `3306` (already set by default)
+   - **database_name**: `vikunja` (already set by default)
+   - **database_user**: `vikunja` (already set by default)
+   - **database_password**: the password you chose in step 2
+5. Restart Vikunja.
+
+The defaults (host, port, database name, and user) are already configured for
+the HA MariaDB add-on. You only need to set the password.
+
+> **Note:** You can also use any external MySQL/MariaDB server by changing the
+> host and port to your server's address.
+
+## CalDAV
+
+Vikunja supports CalDAV for syncing tasks with native calendar and reminder
+apps. The CalDAV endpoint is:
 
 ```
-http://<YOUR_HA_IP>:3456
+http://<YOUR_HA_IP>:3456/dav/
 ```
 
-## Mobile and desktop apps
+## Email notifications
 
-Vikunja works with several clients:
+To enable email notifications, configure the mailer settings:
 
-- **Web interface** — built-in, accessible from the sidebar or direct URL
-- **Mobile apps** — third-party apps available for iOS and Android that
-  support the Vikunja API
-- **DAV sync** — sync tasks with any CalDAV-compatible app (Apple Reminders,
-  Thunderbird, GNOME Calendar, etc.)
-
-When connecting a client, use the server URL `http://<YOUR_HA_IP>:3456`.
-
-## Configuration
-
-### Service secret
-
-Used internally to sign authentication tokens. The add-on auto-generates
-one on first start and persists it. Only set this if migrating from an
-existing Vikunja instance.
-
-### Frontend URL
-
-If you access Vikunja from outside your network (via a domain and reverse
-proxy), set this to the full URL (e.g. `https://tasks.example.com`). This
-ensures email links and sharing URLs point to the right place.
-
-### Allow registration
-
-Enabled by default so you can create your first account. **Disable this**
-once all household members have accounts.
-
-### Database
-
-By default Vikunja uses **SQLite**, which requires no extra setup. The database
-file is stored in the add-on's persistent storage.
-
-If you prefer to use an external **MySQL** or **MariaDB** server, change the
-database type to `mysql` and fill in the connection details:
-
-| Setting           | Description                                    |
-| ----------------- | ---------------------------------------------- |
-| Database type     | `sqlite` (default) or `mysql`                  |
-| Database host     | Hostname or IP of your MySQL/MariaDB server    |
-| Database port     | Port number (default `3306`)                   |
-| Database name     | Name of the database (e.g. `vikunja`)          |
-| Database user     | Username for the database connection           |
-| Database password | Password for the database connection           |
-
-Make sure the database and user exist before starting the add-on. For example
-in MySQL/MariaDB:
-
-```sql
-CREATE DATABASE vikunja CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
-CREATE USER 'vikunja'@'%' IDENTIFIED BY 'your_password';
-GRANT ALL PRIVILEGES ON vikunja.* TO 'vikunja'@'%';
-FLUSH PRIVILEGES;
-```
-
-### Email (SMTP)
-
-Configure SMTP to enable email notifications, password resets, task
-reminders, and team invitations. Without SMTP, users can still log in and
-use Vikunja, but email-dependent features will not work.
-
-## Data and backups
-
-All data is stored in `/data/vikunja/` inside the add-on's persistent
-storage:
-
-- `vikunja.db` — the SQLite database (only when using SQLite)
-- `files/` — uploaded file attachments
-
-Back up the entire directory regularly. The Home Assistant backup feature
-includes add-on data automatically. If using MySQL/MariaDB, back up the
-external database separately.
+- **mailer_enabled**: `true`
+- **mailer_host**: your SMTP server (e.g., `smtp.gmail.com`)
+- **mailer_port**: usually `587` for TLS
+- **mailer_username**: your email address
+- **mailer_password**: your email password or app-specific password
+- **mailer_from_email**: the "from" address for notifications
 
 ## Support
 
-- [Vikunja Website](https://vikunja.io)
-- [Vikunja Documentation](https://vikunja.io/docs)
-- [Vikunja GitHub](https://github.com/go-vikunja/vikunja)
-- [Vikunja Community](https://community.vikunja.io)
+- [Vikunja documentation](https://vikunja.io/docs/)
+- [This add-on's repository](https://github.com/go-vikunja/vikunja)

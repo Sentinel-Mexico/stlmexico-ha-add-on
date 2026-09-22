@@ -20,6 +20,30 @@ configuration:
     description: >-
       Allow new users to create accounts. Disable this after you have
       created all the accounts you need.
+  database_type:
+    name: Database Type
+    description: >-
+      Choose SQLite (default, simplest) or MySQL for use with MariaDB.
+      For MariaDB, install the MariaDB add-on and set the password below.
+  database_host:
+    name: Database Host
+    description: >-
+      Hostname of the MySQL/MariaDB server. The default "core-mariadb" points
+      to the official Home Assistant MariaDB add-on.
+  database_port:
+    name: Database Port
+    description: Port of the MySQL/MariaDB server (default 3306).
+  database_name:
+    name: Database Name
+    description: Name of the database to use in MariaDB.
+  database_user:
+    name: Database User
+    description: Username for the database connection.
+  database_password:
+    name: Database Password
+    description: >-
+      Password for the database connection. This must match the password
+      you configured in the MariaDB add-on.
   mailer_enabled:
     name: Enable Email
     description: >-

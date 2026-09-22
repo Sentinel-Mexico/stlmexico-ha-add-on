@@ -55,15 +55,49 @@ response = client.chat.completions.create(
 )
 ```
 
-## Configuration
+## Database
 
-### Database
+### SQLite (default — currently the only active engine)
 
 FreeLLMApi uses **SQLite** for all data storage. The database is stored
 automatically in the add-on's persistent storage — no configuration needed.
 
-> **Note:** The upstream FreeLLMApi server only supports SQLite. MariaDB/MySQL
-> is not supported by the server engine.
+### MariaDB / MySQL (pre-configured for future support)
+
+The add-on configuration includes MariaDB/MySQL connection settings, pre-filled
+with defaults that match the **MariaDB** add-on for Home Assistant:
+
+- **database_host**: `core-mariadb` (the HA MariaDB add-on)
+- **database_port**: `3306`
+- **database_name**: `freellmapi`
+- **database_user**: `freellmapi`
+
+To prepare for MySQL support:
+
+1. Install the **MariaDB** add-on from the Home Assistant Add-on Store.
+2. In the MariaDB add-on configuration, add a database and user:
+   ```yaml
+   databases:
+     - freellmapi
+   logins:
+     - username: freellmapi
+       password: YOUR_SECURE_PASSWORD
+   rights:
+     - username: freellmapi
+       database: freellmapi
+   ```
+3. Start (or restart) the MariaDB add-on.
+4. In this FreeLLMApi add-on's configuration, set:
+   - **database_type**: `mysql` or `mariadb`
+   - **database_password**: the password you chose in step 2
+5. Restart FreeLLMApi.
+
+> **Note:** The upstream FreeLLMApi server currently uses SQLite as its storage
+> engine. The MySQL/MariaDB configuration is saved and the connection string is
+> exported, but the server will continue using SQLite until the upstream project
+> adds MySQL support. No data will be lost — your SQLite database remains
+> active. When MySQL support is added upstream, the add-on will automatically
+> switch to your configured MariaDB instance.
 
 ### Encryption key
 
@@ -86,9 +120,6 @@ freellmapi setup-claude      # Configure Claude Code
 freellmapi setup-cursor      # Configure Cursor
 freellmapi setup-generic     # Configure any OpenAI-compatible client
 ```
-
-The CLI automatically points to the local server. Add `--help` to any command
-for details.
 
 ## Endpoints
 

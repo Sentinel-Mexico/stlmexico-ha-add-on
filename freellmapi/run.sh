@@ -10,10 +10,19 @@ API_PORT=$(bashio::config 'api_port')
 LOG_LEVEL=$(bashio::config 'log_level')
 ENCRYPTION_KEY=$(bashio::config 'encryption_key')
 
-# ---------- Generate encryption key if not set --------------------------------
+DB_TYPE=$(bashio::config 'database_type')
+DB_HOST=$(bashio::config 'database_host')
+DB_PORT=$(bashio::config 'database_port')
+DB_NAME=$(bashio::config 'database_name')
+DB_USER=$(bashio::config 'database_user')
+DB_PASS=$(bashio::config 'database_password')
+
+# ---------- Persistent data directory ----------------------------------------
 
 DATA_DIR="/data/freellmapi"
 mkdir -p "${DATA_DIR}"
+
+# ---------- Generate encryption key if not set --------------------------------
 
 if [ -z "${ENCRYPTION_KEY}" ]; then
     KEY_FILE="${DATA_DIR}/.encryption_key"
@@ -33,20 +42,35 @@ fi
 export PORT="${API_PORT}"
 export HOST="0.0.0.0"
 export LOG_LEVEL="${LOG_LEVEL}"
-export FREEAPI_DB_PATH="${DATA_DIR}/freellmapi.db"
 export ENCRYPTION_KEY="${ENCRYPTION_KEY}"
 export DATA_DIR="${DATA_DIR}"
 export NODE_ENV="production"
 
 # Reduce V8 heap on memory-constrained devices (Pi, small VMs).
-# The server idles well under 128 MB; 256 MB leaves room for peak
-# request bursts without letting a leak consume the whole host.
 export NODE_OPTIONS="--max-old-space-size=256"
 
 # Make the API URL available for the CLI
 export FREELLMAPI_URL="http://127.0.0.1:${API_PORT}"
 
-bashio::log.info "Using SQLite at ${FREEAPI_DB_PATH}"
+# ---------- Database configuration -------------------------------------------
+# FreeLLMApi currently uses SQLite via better-sqlite3. The DATABASE_URL env var
+# is set for forward-compatibility if the upstream project adds MySQL support.
+# For now, the server reads FREEAPI_DB_PATH for the SQLite file location.
+
+if [ "${DB_TYPE}" = "mysql" ] || [ "${DB_TYPE}" = "mariadb" ]; then
+    if [ -n "${DB_HOST}" ] && [ -n "${DB_PASS}" ]; then
+        export DATABASE_URL="mysql://${DB_USER}:${DB_PASS}@${DB_HOST}:${DB_PORT}/${DB_NAME}"
+        bashio::log.info "Database config: MySQL/MariaDB at ${DB_HOST}:${DB_PORT}/${DB_NAME}"
+        bashio::log.warning "NOTE: FreeLLMApi currently uses SQLite as its storage engine."
+        bashio::log.warning "The MySQL/MariaDB config is saved but the server will use SQLite."
+        bashio::log.warning "This will be activated when the upstream project adds MySQL support."
+    else
+        bashio::log.warning "MySQL/MariaDB selected but host or password is empty — falling back to SQLite."
+    fi
+fi
+
+export FREEAPI_DB_PATH="${DATA_DIR}/freellmapi.db"
+bashio::log.info "SQLite database at ${FREEAPI_DB_PATH}"
 
 # ---------- Configure nginx Ingress -------------------------------------------
 

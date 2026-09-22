@@ -1,5 +1,5 @@
 name: FreeLLMApi for HA
-version: "1.0.7"
+version: "1.0.8"
 slug: freellmapi
 description: >-
   Port of FreeLLMApi for Home Assistant. Aggregates 34+ free LLM providers
@@ -31,11 +31,23 @@ options:
   api_port: 39101
   log_level: "info"
   encryption_key: ""
+  database_type: "sqlite"
+  database_host: "core-mariadb"
+  database_port: 3306
+  database_name: "freellmapi"
+  database_user: "freellmapi"
+  database_password: ""
 
 schema:
   api_port: port
   log_level: "list(debug|info|warn|error)"
   encryption_key: "str?"
+  database_type: "list(sqlite|mysql|mariadb)"
+  database_host: "str?"
+  database_port: "port?"
+  database_name: "str?"
+  database_user: "str?"
+  database_password: "password?"
 
 startup: application
 stage: experimental

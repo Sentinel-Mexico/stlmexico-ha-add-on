@@ -1,5 +1,5 @@
 name: Vikunja
-version: "1.0.11"
+version: "1.0.12"
 slug: vikunja
 description: >-
   Self-hosted task and project management. Open-source alternative to Todoist,
@@ -33,10 +33,10 @@ options:
   log_level: "info"
   registration_enabled: true
   database_type: "sqlite"
-  database_host: ""
+  database_host: "core-mariadb"
   database_port: 3306
   database_name: "vikunja"
-  database_user: ""
+  database_user: "vikunja"
   database_password: ""
   mailer_enabled: false
   mailer_host: ""

@@ -1,5 +1,22 @@
 # Changelog
 
+## 1.0.8 — 2026-09-22
+
+### Added
+
+- MariaDB / MySQL configuration options with defaults pre-filled for the Home
+  Assistant MariaDB add-on (`core-mariadb:3306`). The database type, host, port,
+  name, and user are ready — just set the password and switch to `mysql` or
+  `mariadb`.
+- Documentation with step-by-step guide for setting up the HA MariaDB add-on.
+
+### Note
+
+The upstream FreeLLMApi server currently uses SQLite. The MySQL/MariaDB
+connection string is exported as `DATABASE_URL` for forward-compatibility.
+The server will continue using SQLite until the upstream project adds MySQL
+support. Your configuration is preserved and will activate automatically.
+
 ## 1.0.7 — 2026-09-22
 
 ### Fixed

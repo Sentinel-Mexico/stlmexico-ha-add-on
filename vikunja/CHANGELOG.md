@@ -1,5 +1,24 @@
 # Changelog
 
+## 1.0.12 — 2026-09-22
+
+### Fixed
+
+- Fixed blank white screen: patched `history.pushState` and `replaceState`
+  immediately (synchronously) instead of deferring to a microtask. The previous
+  timing allowed Vue Router to call `pushState` before the patches were active,
+  causing navigation to escape the ingress prefix and leaving the content area
+  empty while the app shell rendered.
+- Added `window.open` patching so links opened from JavaScript also go through
+  the ingress proxy.
+
+### Changed
+
+- MariaDB default configuration now points to the HA MariaDB add-on
+  (`core-mariadb:3306`) with pre-filled database name and user. Just install the
+  MariaDB add-on, set the password, and switch `database_type` to `mysql`.
+- Updated documentation with step-by-step MariaDB setup guide.
+
 ## 1.0.11 — 2026-09-22
 
 ### Fixed

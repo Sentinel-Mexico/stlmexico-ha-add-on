@@ -1,5 +1,4 @@
 (function () {
-  // Detect HA ingress from the current URL.
   var match = location.pathname.match(
     /^(\/api\/hassio_ingress\/[^/]+)(\/.*)?$/
   );
@@ -7,20 +6,19 @@
 
   var ingressBase = match[1];
   var cleanPath = match[2] || "/";
+  var skipNextReplace = true;
 
-  // -- 1) Strip the ingress prefix from the URL so Vue Router sees "/".
-  //    Vue Router inspects location.pathname at boot; it must see the
-  //    app-root "/" (or "/login", etc.), not the ingress prefix.
-  history.replaceState(history.state, "", cleanPath + location.search + location.hash);
-
-  // -- 2) Patch pushState / replaceState so Vue Router navigation
-  //    adds the ingress prefix back (the browser needs it to route
-  //    through HA's ingress proxy).
+  // -- 1) Patch pushState / replaceState IMMEDIATELY (before any module script
+  //    runs). Use a flag to let our own initial replaceState through unmodified.
   var origPush = history.pushState;
   var origReplace = history.replaceState;
 
-  function patchState(orig) {
+  function patchState(orig, isReplace) {
     return function (state, title, url) {
+      if (isReplace && skipNextReplace) {
+        skipNextReplace = false;
+        return orig.call(this, state, title, url);
+      }
       if (typeof url === "string" && url.charAt(0) === "/" && url.indexOf(ingressBase) !== 0) {
         url = ingressBase + url;
       }
@@ -28,20 +26,18 @@
     };
   }
 
-  // Defer to next microtask so our own replaceState above goes through unmodified.
-  Promise.resolve().then(function () {
-    history.pushState = patchState(origPush);
-    history.replaceState = patchState(origReplace);
-  });
+  history.pushState = patchState(origPush, false);
+  history.replaceState = patchState(origReplace, true);
+
+  // -- 2) Strip the ingress prefix so Vue Router sees "/" (or "/login", etc.).
+  //    skipNextReplace is true, so our patched replaceState lets this through.
+  history.replaceState(history.state, "", cleanPath + location.search + location.hash);
 
   // -- 3) Helper: prepend the ingress prefix to absolute paths.
   function rewriteUrl(url) {
     if (typeof url !== "string") return url;
-    // Already has the ingress prefix — leave it alone.
     if (url.indexOf(ingressBase) !== -1) return url;
-    // Absolute path: prepend ingress base.
     if (url.charAt(0) === "/") return ingressBase + url;
-    // Full origin URL: insert ingress base after origin.
     if (url.lastIndexOf(location.origin + "/", 0) === 0) {
       return location.origin + ingressBase + url.substring(location.origin.length);
     }
@@ -70,5 +66,15 @@
       args[1] = rewriteUrl(args[1]);
     }
     return origOpen.apply(this, args);
+  };
+
+  // -- 6) Patch window.open so links opened from JS go through ingress.
+  var origWindowOpen = window.open;
+  window.open = function (url) {
+    var args = Array.prototype.slice.call(arguments);
+    if (typeof args[0] === "string") {
+      args[0] = rewriteUrl(args[0]);
+    }
+    return origWindowOpen.apply(this, args);
   };
 })();
