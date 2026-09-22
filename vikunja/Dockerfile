@@ -35,6 +35,7 @@ RUN chmod +x /app/vikunja/vikunja
 
 COPY run.sh /
 COPY nginx-ingress.conf /etc/nginx/http.d/ingress.conf
+COPY ha-ingress-fix.js /etc/nginx/ha-ingress-fix.js
 
 RUN rm -f /etc/nginx/http.d/default.conf
 RUN chmod a+x /run.sh
