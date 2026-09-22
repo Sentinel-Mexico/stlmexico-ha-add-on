@@ -59,8 +59,10 @@ COPY --from=builder /build/client/dist /opt/freellmapi/client/dist
 COPY --from=builder /build/cli/dist /opt/freellmapi/cli/dist
 COPY --from=builder /build/cli/package.json /opt/freellmapi/cli/package.json
 
-# Rebuild native modules (better-sqlite3) against Alpine musl libc
-RUN apk add --no-cache --virtual .build-deps python3 make g++ \
+# Rebuild native modules (better-sqlite3) against Alpine musl libc.
+# npm is installed temporarily for the rebuild, then removed with the other
+# build tools to keep the runtime image lean.
+RUN apk add --no-cache --virtual .build-deps python3 make g++ npm \
   && cd /opt/freellmapi && npm rebuild better-sqlite3 \
   && apk del .build-deps
 

@@ -1,5 +1,14 @@
 # Changelog
 
+## 1.0.7 — 2026-09-22
+
+### Fixed
+
+- Fixed Docker build failure introduced in 1.0.6: the `npm` package was removed
+  from the runtime image but is still required during the build to rebuild
+  the better-sqlite3 native module. It is now installed as a temporary build
+  dependency and removed after the rebuild completes.
+
 ## 1.0.6 — 2026-09-22
 
 ### Fixed
