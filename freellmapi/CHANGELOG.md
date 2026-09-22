@@ -1,5 +1,17 @@
 # Changelog
 
+## 1.0.9 — 2026-09-22
+
+### Fixed
+
+- Significantly faster Docker build (install/update): switched the build stage
+  from Debian to Alpine so the native SQLite module compiles for the same
+  platform as the runtime. This eliminates the slow C++ recompilation step that
+  previously ran every time the add-on was installed or updated.
+- Increased V8 heap limit from 256 MB to 512 MB to prevent garbage collection
+  thrashing during catalog sync (300+ models).
+- Increased healthcheck start period from 90 s to 120 s for low-power hardware.
+
 ## 1.0.8 — 2026-09-22
 
 ### Added

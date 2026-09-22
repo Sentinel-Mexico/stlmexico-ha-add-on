@@ -2,7 +2,7 @@ build_from:
   amd64: "ghcr.io/home-assistant/amd64-base:3.21"
   aarch64: "ghcr.io/home-assistant/aarch64-base:3.21"
 args:
-  BUILD_VERSION: "1.0.8"
+  BUILD_VERSION: "1.0.9"
 labels:
   org.opencontainers.image.title: "FreeLLMApi for Home Assistant"
   org.opencontainers.image.description: "Port of FreeLLMApi for Home Assistant — 34+ free LLM providers behind one OpenAI-compatible endpoint"

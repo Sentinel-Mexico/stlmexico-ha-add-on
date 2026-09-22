@@ -3,11 +3,9 @@ ARG BUILD_FROM="ghcr.io/home-assistant/amd64-base:3.21"
 # ---------------------------------------------------------------------------
 # Stage 1 — install deps & build (server + cli + client)
 # ---------------------------------------------------------------------------
-FROM node:20-bookworm-slim AS builder
+FROM node:20-alpine AS builder
 
-RUN apt-get update \
-  && apt-get install -y --no-install-recommends python3 make g++ \
-  && rm -rf /var/lib/apt/lists/*
+RUN apk add --no-cache python3 make g++
 
 WORKDIR /build
 
@@ -59,13 +57,6 @@ COPY --from=builder /build/client/dist /opt/freellmapi/client/dist
 COPY --from=builder /build/cli/dist /opt/freellmapi/cli/dist
 COPY --from=builder /build/cli/package.json /opt/freellmapi/cli/package.json
 
-# Rebuild native modules (better-sqlite3) against Alpine musl libc.
-# npm is installed temporarily for the rebuild, then removed with the other
-# build tools to keep the runtime image lean.
-RUN apk add --no-cache --virtual .build-deps python3 make g++ npm \
-  && cd /opt/freellmapi && npm rebuild better-sqlite3 \
-  && apk del .build-deps
-
 RUN ln -sf /opt/freellmapi/cli/dist/index.js /usr/local/bin/freellmapi 2>/dev/null || true
 
 COPY run.sh /
@@ -74,7 +65,7 @@ COPY nginx-ingress.conf /etc/nginx/http.d/ingress.conf
 RUN rm -f /etc/nginx/http.d/default.conf
 RUN chmod a+x /run.sh
 
-HEALTHCHECK --interval=30s --timeout=10s --start-period=90s --retries=3 \
+HEALTHCHECK --interval=30s --timeout=10s --start-period=120s --retries=3 \
     CMD curl -sf http://127.0.0.1:${PORT:-39101}/v1/models >/dev/null || exit 1
 
 CMD [ "/run.sh" ]

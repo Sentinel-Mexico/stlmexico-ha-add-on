@@ -1,5 +1,5 @@
 name: FreeLLMApi for HA
-version: "1.0.8"
+version: "1.0.9"
 slug: freellmapi
 description: >-
   Port of FreeLLMApi for Home Assistant. Aggregates 34+ free LLM providers

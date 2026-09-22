@@ -1,5 +1,23 @@
 # Changelog
 
+## 1.0.14 — 2026-09-22
+
+### Fixed
+
+- Fixed persistent blank white screen: the root cause was that the ingress fix
+  script called `history.replaceState` synchronously during HTML parsing,
+  changing `document.URL` from `/api/hassio_ingress/TOKEN/` to `/` before the
+  browser resolved relative asset paths (`src="./assets/..."`). This caused all
+  JavaScript and CSS to be fetched from `/assets/...` (Home Assistant itself)
+  instead of through the ingress proxy, so nothing loaded.
+- Asset paths in the HTML are now rewritten to absolute ingress paths
+  (`/api/hassio_ingress/TOKEN/assets/...`) instead of relative (`./assets/...`),
+  so they resolve correctly regardless of URL bar state.
+- The `replaceState` that cleans the URL is now deferred to `DOMContentLoaded`,
+  after all asset tags have been parsed and queued for download.
+- Added `gunzip on` to nginx so sub_filter works even if Vikunja sends gzip
+  responses despite the `Accept-Encoding: ""` header.
+
 ## 1.0.13 — 2026-09-22
 
 ### Fixed

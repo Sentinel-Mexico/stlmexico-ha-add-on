@@ -146,6 +146,7 @@ bashio::log.info "Ingress entry: ${INGRESS_ENTRY}"
 
 sed -i "s|%%VIKUNJA_PORT%%|3456|g" /etc/nginx/http.d/ingress.conf
 sed -i "s|%%INGRESS_PORT%%|${INGRESS_PORT}|g" /etc/nginx/http.d/ingress.conf
+sed -i "s|%%INGRESS_ENTRY%%|${INGRESS_ENTRY}|g" /etc/nginx/http.d/ingress.conf
 
 # ---------- Start nginx (background) -----------------------------------------
 

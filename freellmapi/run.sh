@@ -47,7 +47,7 @@ export DATA_DIR="${DATA_DIR}"
 export NODE_ENV="production"
 
 # Reduce V8 heap on memory-constrained devices (Pi, small VMs).
-export NODE_OPTIONS="--max-old-space-size=256"
+export NODE_OPTIONS="--max-old-space-size=512"
 
 # Make the API URL available for the CLI
 export FREELLMAPI_URL="http://127.0.0.1:${API_PORT}"

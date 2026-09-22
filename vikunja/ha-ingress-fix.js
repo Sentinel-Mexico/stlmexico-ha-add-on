@@ -6,19 +6,14 @@
 
   var ingressBase = match[1];
   var cleanPath = match[2] || "/";
-  var skipNextReplace = true;
 
-  // -- 1) Patch pushState / replaceState IMMEDIATELY (before any module script
-  //    runs). Use a flag to let our own initial replaceState through unmodified.
+  // -- 1) Patch pushState / replaceState IMMEDIATELY so Vue Router
+  //    navigations stay within the ingress prefix.
   var origPush = history.pushState;
   var origReplace = history.replaceState;
 
-  function patchState(orig, isReplace) {
+  function patchState(orig) {
     return function (state, title, url) {
-      if (isReplace && skipNextReplace) {
-        skipNextReplace = false;
-        return orig.call(this, state, title, url);
-      }
       if (typeof url === "string" && url.charAt(0) === "/" && url.indexOf(ingressBase) !== 0) {
         url = ingressBase + url;
       }
@@ -26,12 +21,17 @@
     };
   }
 
-  history.pushState = patchState(origPush, false);
-  history.replaceState = patchState(origReplace, true);
+  history.pushState = patchState(origPush);
+  history.replaceState = patchState(origReplace);
 
-  // -- 2) Strip the ingress prefix so Vue Router sees "/" (or "/login", etc.).
-  //    skipNextReplace is true, so our patched replaceState lets this through.
-  history.replaceState(history.state, "", cleanPath + location.search + location.hash);
+  // -- 2) Strip the ingress prefix AFTER the full page has loaded.
+  //    We must NOT do this synchronously because it changes document.URL,
+  //    which would break relative path resolution for assets still being
+  //    parsed in the HTML (src="./assets/..." would resolve against "/"
+  //    instead of the ingress prefix).
+  window.addEventListener("DOMContentLoaded", function () {
+    origReplace.call(history, history.state, "", cleanPath + location.search + location.hash);
+  });
 
   // -- 3) Helper: prepend the ingress prefix to absolute paths.
   function rewriteUrl(url) {
