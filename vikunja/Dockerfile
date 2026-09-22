@@ -25,7 +25,8 @@ RUN apk add --no-cache \
         curl \
         ca-certificates \
         libgcc \
-        openssl
+        openssl \
+        mariadb-client
 
 RUN mkdir -p /app/vikunja /data/vikunja/files /db
 

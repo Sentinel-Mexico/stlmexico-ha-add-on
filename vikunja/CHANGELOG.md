@@ -1,5 +1,19 @@
 # Changelog
 
+## 1.0.13 — 2026-09-22
+
+### Fixed
+
+- Fixed MariaDB startup error (`Error 1049: Unknown database 'vikunja'`): the
+  add-on now automatically creates the database if it does not exist when using
+  MySQL/MariaDB. It also waits for MariaDB to be ready before starting Vikunja.
+- Fixed nginx warning about duplicate MIME type `text/html`.
+
+### Changed
+
+- Added `mariadb-client` to the Docker image so the add-on can verify and
+  auto-create the database on startup.
+
 ## 1.0.12 — 2026-09-22
 
 ### Fixed

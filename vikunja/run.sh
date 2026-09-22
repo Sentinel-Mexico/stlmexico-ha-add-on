@@ -69,6 +69,41 @@ if [ "${DB_TYPE}" = "mysql" ] && [ -n "${DB_HOST}" ]; then
     export VIKUNJA_DATABASE_USER="${DB_USER}"
     export VIKUNJA_DATABASE_PASSWORD="${DB_PASS}"
     bashio::log.info "Database: MySQL/MariaDB at ${DB_HOST}:${DB_PORT}/${DB_NAME}"
+
+    # Auto-create the database if it does not exist yet.
+    bashio::log.info "Checking if database '${DB_NAME}' exists..."
+    MAX_RETRIES=15
+    RETRY=0
+    DB_READY=false
+    while [ "${RETRY}" -lt "${MAX_RETRIES}" ]; do
+        if mariadb -h "${DB_HOST}" -P "${DB_PORT}" -u "${DB_USER}" -p"${DB_PASS}" \
+            -e "SELECT 1;" >/dev/null 2>&1; then
+            DB_READY=true
+            break
+        fi
+        RETRY=$((RETRY + 1))
+        bashio::log.info "Waiting for MariaDB to be ready... (${RETRY}/${MAX_RETRIES})"
+        sleep 2
+    done
+
+    if [ "${DB_READY}" = "true" ]; then
+        if ! mariadb -h "${DB_HOST}" -P "${DB_PORT}" -u "${DB_USER}" -p"${DB_PASS}" \
+            -e "USE ${DB_NAME};" >/dev/null 2>&1; then
+            bashio::log.info "Database '${DB_NAME}' does not exist. Attempting to create it..."
+            if mariadb -h "${DB_HOST}" -P "${DB_PORT}" -u "${DB_USER}" -p"${DB_PASS}" \
+                -e "CREATE DATABASE \`${DB_NAME}\` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;" 2>&1; then
+                bashio::log.info "Database '${DB_NAME}' created successfully."
+            else
+                bashio::log.warning "Could not auto-create database '${DB_NAME}'. Please create it manually in MariaDB."
+                bashio::log.warning "The user '${DB_USER}' may not have CREATE DATABASE privileges."
+            fi
+        else
+            bashio::log.info "Database '${DB_NAME}' already exists."
+        fi
+    else
+        bashio::log.warning "Could not connect to MariaDB at ${DB_HOST}:${DB_PORT} after ${MAX_RETRIES} attempts."
+        bashio::log.warning "Vikunja will try to connect on its own — it may fail if the database does not exist."
+    fi
 else
     export VIKUNJA_DATABASE_TYPE="sqlite"
     export VIKUNJA_DATABASE_PATH="${DB_DIR}/vikunja.db"

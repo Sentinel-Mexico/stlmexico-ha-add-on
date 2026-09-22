@@ -41,21 +41,20 @@ For better performance with multiple users or large amounts of data, use the
      - username: vikunja
        database: vikunja
    ```
-3. Start (or restart) the MariaDB add-on.
+3. Start (or restart) the MariaDB add-on so it creates the database and user.
 4. In this Vikunja add-on's configuration, set:
    - **database_type**: `mysql`
-   - **database_host**: `core-mariadb` (already set by default)
-   - **database_port**: `3306` (already set by default)
-   - **database_name**: `vikunja` (already set by default)
-   - **database_user**: `vikunja` (already set by default)
    - **database_password**: the password you chose in step 2
 5. Restart Vikunja.
 
-The defaults (host, port, database name, and user) are already configured for
-the HA MariaDB add-on. You only need to set the password.
+The host (`core-mariadb`), port (`3306`), database name (`vikunja`), and user
+(`vikunja`) are already set by default — they match the HA MariaDB add-on. You
+only need to change `database_type` to `mysql` and enter the password.
 
-> **Note:** You can also use any external MySQL/MariaDB server by changing the
-> host and port to your server's address.
+> **Important:** You must create the database and user in the MariaDB add-on
+> configuration **before** starting Vikunja with MySQL mode. The add-on will
+> try to auto-create the database, but this only works if the user has
+> sufficient privileges.
 
 ## CalDAV
 
