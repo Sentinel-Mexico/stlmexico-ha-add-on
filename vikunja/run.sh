@@ -11,6 +11,13 @@ FRONTEND_URL=$(bashio::config 'frontend_url')
 LOG_LEVEL=$(bashio::config 'log_level')
 REGISTRATION_ENABLED=$(bashio::config 'registration_enabled')
 
+DB_TYPE=$(bashio::config 'database_type')
+DB_HOST=$(bashio::config 'database_host')
+DB_PORT=$(bashio::config 'database_port')
+DB_NAME=$(bashio::config 'database_name')
+DB_USER=$(bashio::config 'database_user')
+DB_PASS=$(bashio::config 'database_password')
+
 MAILER_ENABLED=$(bashio::config 'mailer_enabled')
 MAILER_HOST=$(bashio::config 'mailer_host')
 MAILER_PORT=$(bashio::config 'mailer_port')
@@ -48,12 +55,27 @@ export VIKUNJA_SERVICE_SECRET="${SERVICE_SECRET}"
 export VIKUNJA_LOG_LEVEL="${LOG_LEVEL}"
 export VIKUNJA_SERVICE_ENABLEREGISTRATION="${REGISTRATION_ENABLED}"
 
-export VIKUNJA_DATABASE_TYPE="sqlite"
-export VIKUNJA_DATABASE_PATH="${DB_DIR}/vikunja.db"
-
 export VIKUNJA_FILES_BASEPATH="${FILES_DIR}"
 
 export VIKUNJA_CORS_ENABLE="false"
+
+# ---------- Database configuration -------------------------------------------
+
+if [ "${DB_TYPE}" = "mysql" ] && [ -n "${DB_HOST}" ]; then
+    export VIKUNJA_DATABASE_TYPE="mysql"
+    export VIKUNJA_DATABASE_HOST="${DB_HOST}"
+    export VIKUNJA_DATABASE_PORT="${DB_PORT}"
+    export VIKUNJA_DATABASE_DATABASE="${DB_NAME}"
+    export VIKUNJA_DATABASE_USER="${DB_USER}"
+    export VIKUNJA_DATABASE_PASSWORD="${DB_PASS}"
+    bashio::log.info "Database: MySQL/MariaDB at ${DB_HOST}:${DB_PORT}/${DB_NAME}"
+else
+    export VIKUNJA_DATABASE_TYPE="sqlite"
+    export VIKUNJA_DATABASE_PATH="${DB_DIR}/vikunja.db"
+    bashio::log.info "Database: SQLite at ${DB_DIR}/vikunja.db"
+fi
+
+# ---------- Frontend / public URL --------------------------------------------
 
 if [ -n "${FRONTEND_URL}" ]; then
     export VIKUNJA_SERVICE_FRONTENDURL="${FRONTEND_URL}"
@@ -114,7 +136,6 @@ trap shutdown SIGTERM SIGINT
 
 bashio::log.info "Starting Vikunja..."
 bashio::log.info "  Data directory   : ${DATA_DIR}"
-bashio::log.info "  Database         : ${DB_DIR}/vikunja.db"
 bashio::log.info "  Log level        : ${LOG_LEVEL}"
 bashio::log.info "  Registration     : ${REGISTRATION_ENABLED}"
 bashio::log.info "  Web interface    : http://0.0.0.0:3456"

@@ -52,6 +52,33 @@ ensures email links and sharing URLs point to the right place.
 Enabled by default so you can create your first account. **Disable this**
 once all household members have accounts.
 
+### Database
+
+By default Vikunja uses **SQLite**, which requires no extra setup. The database
+file is stored in the add-on's persistent storage.
+
+If you prefer to use an external **MySQL** or **MariaDB** server, change the
+database type to `mysql` and fill in the connection details:
+
+| Setting           | Description                                    |
+| ----------------- | ---------------------------------------------- |
+| Database type     | `sqlite` (default) or `mysql`                  |
+| Database host     | Hostname or IP of your MySQL/MariaDB server    |
+| Database port     | Port number (default `3306`)                   |
+| Database name     | Name of the database (e.g. `vikunja`)          |
+| Database user     | Username for the database connection           |
+| Database password | Password for the database connection           |
+
+Make sure the database and user exist before starting the add-on. For example
+in MySQL/MariaDB:
+
+```sql
+CREATE DATABASE vikunja CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+CREATE USER 'vikunja'@'%' IDENTIFIED BY 'your_password';
+GRANT ALL PRIVILEGES ON vikunja.* TO 'vikunja'@'%';
+FLUSH PRIVILEGES;
+```
+
 ### Email (SMTP)
 
 Configure SMTP to enable email notifications, password resets, task
@@ -63,11 +90,12 @@ use Vikunja, but email-dependent features will not work.
 All data is stored in `/data/vikunja/` inside the add-on's persistent
 storage:
 
-- `vikunja.db` — the SQLite database (tasks, projects, users)
+- `vikunja.db` — the SQLite database (only when using SQLite)
 - `files/` — uploaded file attachments
 
 Back up the entire directory regularly. The Home Assistant backup feature
-includes add-on data automatically.
+includes add-on data automatically. If using MySQL/MariaDB, back up the
+external database separately.
 
 ## Support
 

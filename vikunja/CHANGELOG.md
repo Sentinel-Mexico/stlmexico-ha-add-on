@@ -1,5 +1,15 @@
 # Changelog
 
+## 1.0.10 — 2026-09-22
+
+### Fixed
+
+- Completely redesigned ingress proxy: inject fix script at the start of `<head>` instead of the end so it runs before all other scripts; dynamically create `<base>` tag via JS for correct asset resolution; patch `history.pushState`/`replaceState` so Vue Router navigation stays within ingress; add separate nginx location blocks for API and DAV endpoints to avoid unintended body rewriting.
+
+### Added
+
+- MySQL / MariaDB database support: choose between SQLite (default) or an external MySQL/MariaDB server in the add-on configuration.
+
 ## 1.0.9 — 2026-09-22
 
 ### Fixed
