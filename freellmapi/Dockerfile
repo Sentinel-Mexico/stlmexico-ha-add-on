@@ -42,7 +42,6 @@ LABEL io.hass.type="addon"
 
 RUN apk add --no-cache \
         nodejs \
-        npm \
         nginx \
         jq \
         curl \
@@ -73,7 +72,7 @@ COPY nginx-ingress.conf /etc/nginx/http.d/ingress.conf
 RUN rm -f /etc/nginx/http.d/default.conf
 RUN chmod a+x /run.sh
 
-HEALTHCHECK --interval=30s --timeout=5s --start-period=15s --retries=3 \
+HEALTHCHECK --interval=30s --timeout=10s --start-period=90s --retries=3 \
     CMD curl -sf http://127.0.0.1:${PORT:-39101}/v1/models >/dev/null || exit 1
 
 CMD [ "/run.sh" ]

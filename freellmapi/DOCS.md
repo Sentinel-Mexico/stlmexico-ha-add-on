@@ -57,17 +57,13 @@ response = client.chat.completions.create(
 
 ## Configuration
 
-### Database engine
+### Database
 
-By default, FreeLLMApi uses **SQLite**, which stores everything in a single
-file inside the add-on's persistent storage. No extra setup needed.
+FreeLLMApi uses **SQLite** for all data storage. The database is stored
+automatically in the add-on's persistent storage — no configuration needed.
 
-If you prefer **MariaDB**, install the official MariaDB add-on first, then:
-
-1. Set **Database Engine** to `mariadb`.
-2. Fill in the MariaDB host, port, user, password, and database name.
-3. The default host `core-mariadb` works if you use the official HA MariaDB
-   add-on.
+> **Note:** The upstream FreeLLMApi server only supports SQLite. MariaDB/MySQL
+> is not supported by the server engine.
 
 ### Encryption key
 

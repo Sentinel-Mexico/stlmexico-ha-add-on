@@ -8,15 +8,7 @@ set -e
 
 API_PORT=$(bashio::config 'api_port')
 LOG_LEVEL=$(bashio::config 'log_level')
-DB_ENGINE=$(bashio::config 'db_engine')
 ENCRYPTION_KEY=$(bashio::config 'encryption_key')
-
-# MariaDB settings (only used when db_engine == mariadb)
-MARIADB_HOST=$(bashio::config 'mariadb_host')
-MARIADB_PORT=$(bashio::config 'mariadb_port')
-MARIADB_USER=$(bashio::config 'mariadb_user')
-MARIADB_PASSWORD=$(bashio::config 'mariadb_password')
-MARIADB_DATABASE=$(bashio::config 'mariadb_database')
 
 # ---------- Generate encryption key if not set --------------------------------
 
@@ -36,32 +28,25 @@ if [ -z "${ENCRYPTION_KEY}" ]; then
     fi
 fi
 
-# ---------- Build database URL ------------------------------------------------
-
-if [ "${DB_ENGINE}" = "mariadb" ]; then
-    if [ -z "${MARIADB_USER}" ] || [ -z "${MARIADB_PASSWORD}" ]; then
-        bashio::log.fatal "MariaDB selected but user or password is empty. Please configure MariaDB credentials."
-        exit 1
-    fi
-    DATABASE_URL="mysql://${MARIADB_USER}:${MARIADB_PASSWORD}@${MARIADB_HOST}:${MARIADB_PORT}/${MARIADB_DATABASE}"
-    bashio::log.info "Using MariaDB at ${MARIADB_HOST}:${MARIADB_PORT}/${MARIADB_DATABASE}"
-else
-    DATABASE_URL="file:${DATA_DIR}/freellmapi.db"
-    bashio::log.info "Using SQLite at ${DATA_DIR}/freellmapi.db"
-fi
-
 # ---------- Export environment for FreeLLMApi ---------------------------------
 
 export PORT="${API_PORT}"
 export HOST="0.0.0.0"
 export LOG_LEVEL="${LOG_LEVEL}"
-export DATABASE_URL="${DATABASE_URL}"
+export FREEAPI_DB_PATH="${DATA_DIR}/freellmapi.db"
 export ENCRYPTION_KEY="${ENCRYPTION_KEY}"
 export DATA_DIR="${DATA_DIR}"
 export NODE_ENV="production"
 
+# Reduce V8 heap on memory-constrained devices (Pi, small VMs).
+# The server idles well under 128 MB; 256 MB leaves room for peak
+# request bursts without letting a leak consume the whole host.
+export NODE_OPTIONS="--max-old-space-size=256"
+
 # Make the API URL available for the CLI
 export FREELLMAPI_URL="http://127.0.0.1:${API_PORT}"
+
+bashio::log.info "Using SQLite at ${FREEAPI_DB_PATH}"
 
 # ---------- Configure nginx Ingress -------------------------------------------
 
@@ -100,7 +85,6 @@ trap shutdown SIGTERM SIGINT
 SERVER_DIR="/opt/freellmapi"
 
 bashio::log.info "Starting FreeLLMApi server on port ${API_PORT}..."
-bashio::log.info "  Database engine : ${DB_ENGINE}"
 bashio::log.info "  Log level       : ${LOG_LEVEL}"
 bashio::log.info "  API endpoint    : http://0.0.0.0:${API_PORT}/v1"
 

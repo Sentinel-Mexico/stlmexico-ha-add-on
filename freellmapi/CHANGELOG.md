@@ -1,5 +1,23 @@
 # Changelog
 
+## 1.0.6 — 2026-09-22
+
+### Fixed
+
+- Removed non-functional MariaDB/MySQL database option. The upstream FreeLLMApi
+  server only supports SQLite; the MariaDB settings added in 1.0.5 set an
+  environment variable the server never reads, so they had no effect. SQLite
+  remains the only database engine and requires no configuration.
+- Fixed slow startup on low-power devices (Raspberry Pi, small VMs):
+  - Docker healthcheck start period increased from 15 s to 90 s so the add-on
+    is not marked unhealthy while Node.js is still loading modules.
+  - Healthcheck timeout raised from 5 s to 10 s for constrained hardware.
+  - V8 heap capped at 256 MB to prevent memory pressure on small hosts.
+  - Removed `npm` from the runtime image (only `nodejs` is needed), reducing
+    image size and memory footprint.
+  - Database path now uses the correct `FREEAPI_DB_PATH` environment variable
+    that the server actually reads.
+
 ## 1.0.5 — 2026-09-18
 
 ### Fixed
@@ -32,7 +50,7 @@
 
 ### Changed
 
-- Default API port changed from 3001 to 39101 to avoid conflicts with other services.
+- Default API port changed from 39101 to avoid conflicts with other services.
 - Healthcheck now uses the configured port instead of a hardcoded value.
 
 ## 1.0.0 — 2026-09-18
@@ -43,8 +61,7 @@
 - Based on FreeLLMApi (https://github.com/tashfeenahmed/freellmapi).
 - OpenAI-compatible `/v1` endpoint exposed on port 39101.
 - Built-in dashboard accessible via Home Assistant Ingress.
-- SQLite database by default with optional MariaDB support.
-- Persistent encrypted key storage (AES-256-GCM).
+- SQLite database with persistent encrypted key storage (AES-256-GCM).
 - CLI tools included for coding agent configuration.
 - Ready for integration with Hermes, OpenClaw, and any OpenAI-compatible client.
 - Multi-architecture support: amd64 and aarch64.
