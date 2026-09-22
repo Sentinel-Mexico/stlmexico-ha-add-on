@@ -1,5 +1,17 @@
 # Changelog
 
+## 1.0.15 — 2026-09-22
+
+### Fixed
+
+- Fixed "Vikunja is loading..." stuck forever (assets never loaded): `gunzip on`
+  required a module not present in Alpine's default nginx, causing nginx to
+  reject the config silently. Removed the directive (unnecessary since we
+  already send `Accept-Encoding: ""` upstream). Also enabled `proxy_buffering`
+  in the HTML location so `sub_filter` can scan the full response reliably.
+- Added nginx config validation (`nginx -t`) at startup and a liveness check
+  after launch, so config errors are immediately visible in the add-on logs.
+
 ## 1.0.14 — 2026-09-22
 
 ### Fixed

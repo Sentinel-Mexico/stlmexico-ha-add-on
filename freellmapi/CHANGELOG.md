@@ -1,5 +1,15 @@
 # Changelog
 
+## 1.0.10 — 2026-09-22
+
+### Fixed
+
+- Fixed startup crash: `symbol not found` error in better-sqlite3. The build
+  stage (node:20-alpine) compiled the native module against one Node.js version,
+  but the runtime installed a different version from Alpine's package repos.
+  The Node.js binary is now copied directly from the build stage so the exact
+  same V8 engine that compiled the module also runs it.
+
 ## 1.0.9 — 2026-09-22
 
 ### Fixed

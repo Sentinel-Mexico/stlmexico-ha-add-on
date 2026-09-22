@@ -15,9 +15,9 @@
 
 | Add-on | Description | Version |
 |--------|-------------|---------|
-| [FreeLLMApi for HA](freellmapi/) | OpenAI-compatible LLM gateway with 34+ free providers | 1.0.9 |
+| [FreeLLMApi for HA](freellmapi/) | OpenAI-compatible LLM gateway with 34+ free providers | 1.0.10 |
 | [Vaultwarden for HA](vaultwarden/) | Self-hosted Bitwarden-compatible password manager | 1.0.1 |
-| [Vikunja for HA](vikunja/) | Self-hosted task and project management | 1.0.14 |
+| [Vikunja for HA](vikunja/) | Self-hosted task and project management | 1.0.15 |
 | [Linkwarden for HA](linkwarden/) | Self-hosted bookmark manager and web archive | 1.0.1 |
 | [AFFiNE for HA](affine/) | Self-hosted knowledge base — docs, whiteboards, and databases | 1.0.0 |
 | [Syncthing for HA](syncthing/) | Continuous file synchronization between devices | 1.0.0 |

@@ -38,8 +38,12 @@ LABEL io.hass.description="Port of FreeLLMApi for Home Assistant - 34+ free LLM 
 LABEL io.hass.version="${BUILD_VERSION}"
 LABEL io.hass.type="addon"
 
+# Copy the exact Node.js binary used during the build stage so the V8 ABI
+# matches the native modules (better-sqlite3) compiled against it.
+COPY --from=builder /usr/local/bin/node /usr/local/bin/node
+
 RUN apk add --no-cache \
-        nodejs \
+        libstdc++ \
         nginx \
         jq \
         curl \

@@ -151,8 +151,21 @@ sed -i "s|%%INGRESS_ENTRY%%|${INGRESS_ENTRY}|g" /etc/nginx/http.d/ingress.conf
 # ---------- Start nginx (background) -----------------------------------------
 
 bashio::log.info "Starting nginx for Ingress proxy..."
+
+# Validate the config before starting — catches unknown directives early.
+if ! nginx -t 2>&1; then
+    bashio::log.error "nginx configuration test failed. Dumping ingress.conf for debugging:"
+    cat /etc/nginx/http.d/ingress.conf >&2
+fi
+
 nginx -g "daemon off;" &
 NGINX_PID=$!
+
+# Give nginx a moment to start, then verify it's running.
+sleep 1
+if ! kill -0 "${NGINX_PID}" 2>/dev/null; then
+    bashio::log.error "nginx failed to start! Check the logs above for the reason."
+fi
 
 # ---------- Graceful shutdown handler -----------------------------------------
 
