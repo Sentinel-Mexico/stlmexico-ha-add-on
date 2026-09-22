@@ -7,63 +7,48 @@
 
   var ingressBase = match[1];
   var cleanPath = match[2] || "/";
-  var origin = location.origin;
 
-  // -- 1) Inject <base> so all relative URLs (./assets/…) resolve through ingress.
-  var base = document.createElement("base");
-  base.href = origin + ingressBase + "/";
-  // Insert into <head> immediately (before any link/script is parsed).
-  if (document.head) {
-    document.head.prepend(base);
-  } else {
-    document.addEventListener(
-      "DOMContentLoaded",
-      function () {
-        document.head.prepend(base);
-      },
-      { once: true }
-    );
-  }
+  // -- 1) Strip the ingress prefix from the URL so Vue Router sees "/".
+  //    Vue Router inspects location.pathname at boot; it must see the
+  //    app-root "/" (or "/login", etc.), not the ingress prefix.
+  history.replaceState(history.state, "", cleanPath + location.search + location.hash);
 
-  // -- 2) Rewrite the visible URL so Vue Router matches its "/" routes.
-  history.replaceState(
-    history.state,
-    "",
-    cleanPath + location.search + location.hash
-  );
-
-  // -- 3) Patch pushState/replaceState so Vue Router navigation stays within ingress.
+  // -- 2) Patch pushState / replaceState so Vue Router navigation
+  //    adds the ingress prefix back (the browser needs it to route
+  //    through HA's ingress proxy).
   var origPush = history.pushState;
   var origReplace = history.replaceState;
 
   function patchState(orig) {
     return function (state, title, url) {
-      // Only intercept relative or absolute-path URLs (not full http URLs).
       if (typeof url === "string" && url.charAt(0) === "/" && url.indexOf(ingressBase) !== 0) {
         url = ingressBase + url;
       }
       return orig.call(this, state, title, url);
     };
   }
-  // Don't patch yet — wait until after our own replaceState above has finished.
-  // Patch on next microtask so our call above goes through unmodified.
+
+  // Defer to next microtask so our own replaceState above goes through unmodified.
   Promise.resolve().then(function () {
     history.pushState = patchState(origPush);
     history.replaceState = patchState(origReplace);
   });
 
-  // -- 4) Helper: rewrite a URL to route through ingress.
+  // -- 3) Helper: prepend the ingress prefix to absolute paths.
   function rewriteUrl(url) {
     if (typeof url !== "string") return url;
+    // Already has the ingress prefix — leave it alone.
     if (url.indexOf(ingressBase) !== -1) return url;
+    // Absolute path: prepend ingress base.
     if (url.charAt(0) === "/") return ingressBase + url;
-    if (url.lastIndexOf(origin + "/", 0) === 0) {
-      return origin + ingressBase + url.substring(origin.length);
+    // Full origin URL: insert ingress base after origin.
+    if (url.lastIndexOf(location.origin + "/", 0) === 0) {
+      return location.origin + ingressBase + url.substring(location.origin.length);
     }
     return url;
   }
 
-  // -- 5) Patch fetch.
+  // -- 4) Patch fetch so API calls go through ingress.
   var origFetch = window.fetch;
   window.fetch = function (input, init) {
     if (typeof input === "string") {
@@ -77,7 +62,7 @@
     return origFetch.call(this, input, init);
   };
 
-  // -- 6) Patch XMLHttpRequest.open.
+  // -- 5) Patch XMLHttpRequest.open so XHR calls go through ingress.
   var origOpen = XMLHttpRequest.prototype.open;
   XMLHttpRequest.prototype.open = function () {
     var args = Array.prototype.slice.call(arguments);
