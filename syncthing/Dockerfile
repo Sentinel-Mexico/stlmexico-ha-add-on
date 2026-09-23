@@ -1,5 +1,5 @@
 ARG BUILD_FROM="ghcr.io/home-assistant/amd64-base:3.21"
-ARG SYNCTHING_VERSION="1.29.2"
+ARG SYNCTHING_VERSION="2.1.5"
 
 # ---------------------------------------------------------------------------
 # Stage 1 — Pull the official Syncthing image to copy the binary

@@ -1,0 +1,31 @@
+name: Update Add-ons Versions
+
+on:
+  schedule:
+    - cron: '0 0 * * *' # Run daily at midnight
+  workflow_dispatch: # Allow manual trigger
+
+jobs:
+  update-versions:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Run version update script
+        run: python3 scripts/update_addons.py
+
+      - name: Create Pull Request
+        uses: peter-evans/create-pull-request@v6
+        with:
+          commit-message: "chore: update add-on versions"
+          title: "Update Add-on Versions"
+          body: "This PR automatically updates the add-on versions based on upstream releases."
+          branch: "auto-update-addons"
+          base: "main"
+          labels: "automated pr"

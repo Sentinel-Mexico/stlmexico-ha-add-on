@@ -1,5 +1,5 @@
 ARG BUILD_FROM="ghcr.io/home-assistant/amd64-base:3.21"
-ARG AFFINE_VERSION="stable"
+ARG AFFINE_VERSION="0.27.4"
 
 # ---------------------------------------------------------------------------
 # Stage 1 — Pull the official AFFiNE image to copy the built app
