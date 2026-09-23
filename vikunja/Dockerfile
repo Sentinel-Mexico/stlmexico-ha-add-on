@@ -1,5 +1,5 @@
 ARG BUILD_FROM="ghcr.io/home-assistant/amd64-base:3.21"
-ARG VIKUNJA_VERSION="2.5.0"
+ARG VIKUNJA_VERSION="2.6.0"
 
 # ---------------------------------------------------------------------------
 # Stage 1 — Pull the official Vikunja image to copy binaries & frontend
