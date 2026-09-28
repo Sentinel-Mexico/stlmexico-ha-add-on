@@ -1,5 +1,5 @@
 ARG BUILD_FROM="ghcr.io/home-assistant/amd64-base:3.21"
-ARG NETDATA_VERSION="2.11.0"
+ARG NETDATA_VERSION="2.11.1"
 
 # ---------------------------------------------------------------------------
 # Stage 1 — Pull the official Netdata image to copy dashboard assets
