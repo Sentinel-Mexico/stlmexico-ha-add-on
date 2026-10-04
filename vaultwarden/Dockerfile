@@ -1,5 +1,5 @@
 ARG BUILD_FROM="ghcr.io/home-assistant/amd64-base:3.21"
-ARG VAULTWARDEN_VERSION="1.33.2"
+ARG VAULTWARDEN_VERSION="1.37.3"
 
 # ---------------------------------------------------------------------------
 # Stage 1 — Pull the official Vaultwarden image to copy binaries & web vault
